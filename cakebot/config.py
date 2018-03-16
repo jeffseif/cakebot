@@ -4,7 +4,8 @@ import json
 class Config:
 
     __slots__ = [
-        'autojoin',
+        'forwards',
+        'listens',
         'nick',
         'realname',
         'server',

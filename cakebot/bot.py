@@ -12,6 +12,9 @@ from cakebot.config import Config
 
 class Bot(irc.bot.SingleServerIRCBot):
 
+    FORWARDS = set()
+    LISTENS = set()
+
     @classmethod
     def from_config_path(cls, config_path):
         config = Config.from_json_path(config_path)
@@ -29,17 +32,23 @@ class Bot(irc.bot.SingleServerIRCBot):
     def get_version(self):
         return 'AIRC CakeBot Version {version}'.format(version=__version__)
 
-    def on_nicknameinuse(self, conn, entry):
+    def on_nicknameinuse(self, conn, event):
         old = conn.get_nickname()
         new = old + '_'
         print('Nick {old} already in use; trying {new}'.format(old=old,new=new))
         conn.nick(new)
 
-    def on_welcome(self, conn, entry):
+    def on_welcome(self, conn, event):
         print('Successfully connected to AIRC!')
-        for auto_channel in self.config.autojoin:
-            print('Autojoining channel {channel}'.format(channel=auto_channel))
-            conn.join(auto_channel)
+
+        for channel in self.config.forwards:
+            print('Forwarding to channel {channel}'.format(channel=channel))
+            conn.join(channel)
+            self.FORWARDS.add(channel)
+        for channel in self.config.listens:
+            print('Listening to channel {channel}'.format(channel=channel))
+            conn.join(channel)
+            self.LISTENS.add(channel)
 
     @staticmethod
     def get_is_to_me(nickname, message):
@@ -52,35 +61,35 @@ class Bot(irc.bot.SingleServerIRCBot):
             index += 1
         return message[index:].strip()
 
-    def action(self, conn, entry, message):
-        self.send(conn, entry, '\001ACTION {message}\001'.format(message=message))
+    def action(self, conn, event, message):
+        self.send(conn, event, '\001ACTION {message}\001'.format(message=message))
 
-    def send(self, conn, entry, message):
-        if entry.target.lower() == conn.get_nickname().lower():
-            entry.target = entry.source.nick
-        conn.privmsg(entry.target, message)
-        print('> ({target}): {message}'.format(target=entry.target, message=message))
+    def send(self, conn, event, message):
+        if event.target.lower() == conn.get_nickname().lower():
+            event.target = event.source.nick
+        conn.privmsg(event.target, message)
+        print('> ({target}): {message}'.format(target=event.target, message=message))
 
-    def on_privmsg(self, conn, entry):
-        self.respond(conn, entry, is_private=True)
+    def on_privmsg(self, conn, event):
+        self.respond(conn, event, is_private=True)
 
-    def on_pubmsg(self, conn, entry):
-        self.respond(conn, entry)
+    def on_pubmsg(self, conn, event):
+        self.respond(conn, event)
 
-    def respond(self, conn, entry, is_private=False):
+    def respond(self, conn, event, is_private=False):
         nickname = conn.get_nickname()
-        message = entry.arguments[0].strip()
+        message = event.arguments[0].strip()
 
         if is_private or self.get_is_to_me(nickname, message):
             if not is_private:
                 message = self.strip_nick_from_message(nickname, message)
-            self.try_reply_or_hear(conn, entry, message, 'reply')
+            self.try_reply_or_hear(conn, event, message, 'reply')
 
-        self.try_reply_or_hear(conn, entry, message, 'hear')
+        self.try_reply_or_hear(conn, event, message, 'hear')
 
-    def try_reply_or_hear(self, conn, entry, message, bind_type):
+    def try_reply_or_hear(self, conn, event, message, bind_type):
         for name, pattern, func in BINDS[bind_type]:
             match = pattern.match(message)
             if match:
                 print('{bind_type}: {name}'.format(bind_type=bind_type.upper(), name=name))
-                func(self, conn, entry, message, match)
+                func(self, conn, event, message, match)
