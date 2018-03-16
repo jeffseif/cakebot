@@ -8,6 +8,7 @@ class Config:
         'listens',
         'nick',
         'realname',
+        'patterns',
         'server',
         'ssl',
     ]

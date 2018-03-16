@@ -1,15 +1,6 @@
 from cakebot.bind import bind
 
 
-FORWARD_REGEXES = (
-    '.*brownies.*',
-    '.*cake.*',
-    '.*cookies.*',
-    '.*dessert.*',
-    '.*pie.*',
-)
-
-
 @bind('reply', '^echo (.*)')
 def echo(self, conn, event, message, match):
     reply = match.group(1)
@@ -17,9 +8,9 @@ def echo(self, conn, event, message, match):
 
 
 # @bind('hear', '(.*)')
-def log(self, conn, event, message, match):
-    reply = match.group(1)
-    print('I heard this: ' + reply)
+# def log(self, conn, event, message, match):
+#     reply = match.group(1)
+#     print('I heard this: ' + reply)
 
 
 def forward(self, conn, event, message, match):
@@ -32,6 +23,3 @@ def forward(self, conn, event, message, match):
         for channel in self.FORWARDS:
             event.target = channel
             self.send(conn, event, message)
-
-for FORWARD_REGEX in FORWARD_REGEXES:
-    bind('hear', FORWARD_REGEX)(forward)

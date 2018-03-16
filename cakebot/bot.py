@@ -4,10 +4,10 @@ import irc.connection
 import re
 import ssl
 
+import cakebot.bind
+import cakebot.config
 import cakebot.mods
 from cakebot import __version__
-from cakebot.bind import BINDS
-from cakebot.config import Config
 
 
 class Bot(irc.bot.SingleServerIRCBot):
@@ -17,7 +17,7 @@ class Bot(irc.bot.SingleServerIRCBot):
 
     @classmethod
     def from_config_path(cls, config_path):
-        config = Config.from_json_path(config_path)
+        config = cakebot.config.Config.from_json_path(config_path)
         kwargs = {
             'server_list': [config.server],
             'nickname': config.nick,
@@ -45,10 +45,14 @@ class Bot(irc.bot.SingleServerIRCBot):
             print('Forwarding to channel {channel}'.format(channel=channel))
             conn.join(channel)
             self.FORWARDS.add(channel)
+
         for channel in self.config.listens:
             print('Listening to channel {channel}'.format(channel=channel))
             conn.join(channel)
             self.LISTENS.add(channel)
+
+        for pattern in self.config.patterns:
+            cakebot.bind.bind('hear', pattern)(cakebot.mods.forward)
 
     @staticmethod
     def get_is_to_me(nickname, message):
@@ -88,7 +92,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         self.try_reply_or_hear(conn, event, message, 'hear')
 
     def try_reply_or_hear(self, conn, event, message, bind_type):
-        for name, pattern, match, func in BINDS[bind_type]:
+        for name, pattern, match, func in cakebot.bind.BINDS[bind_type]:
             match = match.match(message)
             if match:
                 print('{bind_type}: {name} (`{pattern}`)'.format(bind_type=bind_type.upper(), name=name, pattern=pattern))

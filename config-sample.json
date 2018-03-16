@@ -1,7 +1,9 @@
 {
-    "autojoin": [],
+    "forwards": [],
+    "listens": [],
     "nick": INSERT_NICK,
     "realname": INSERT_REALNAME,
+    "patterns": [],
     "server": ["irc", INSERT_PORT_NUMBER, INSERT_PASS_STR],
     "ssl": true
 }
