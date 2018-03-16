@@ -1,14 +1,22 @@
-import irc.bot
-
-
-class CakeBot(irc.bot.SingleServerIRCBot):
-    pass
+from cakebot.bot import Bot
 
 
 def main():
-    print('here')
-    pass
+    import argparse
+
+    parser = argparse.ArgumentParser(description='AIRC CakeBot')
+    parser.add_argument(
+        '--config_path',
+        '-c',
+        default='config.py',
+        type=str,
+        help='Path to AIRC bot config json file',
+    )
+    args = parser.parse_args()
+
+    Bot.from_config_path(args.config_path).start()
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    sys.exit(main())
