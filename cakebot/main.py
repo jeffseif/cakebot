@@ -1,3 +1,4 @@
+from cakebot import __version__
 from cakebot.bot import Bot
 
 
@@ -5,6 +6,11 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description='AIRC CakeBot')
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='%(prog)s {version}'.format(version=__version__),
+    )
     parser.add_argument(
         '--config_path',
         '-c',
