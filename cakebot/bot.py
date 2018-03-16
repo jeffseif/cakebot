@@ -88,8 +88,8 @@ class Bot(irc.bot.SingleServerIRCBot):
         self.try_reply_or_hear(conn, event, message, 'hear')
 
     def try_reply_or_hear(self, conn, event, message, bind_type):
-        for name, pattern, func in BINDS[bind_type]:
-            match = pattern.match(message)
+        for name, pattern, match, func in BINDS[bind_type]:
+            match = match.match(message)
             if match:
-                print('{bind_type}: {name}'.format(bind_type=bind_type.upper(), name=name))
+                print('{bind_type}: {name} (`{pattern}`)'.format(bind_type=bind_type.upper(), name=name, pattern=pattern))
                 func(self, conn, event, message, match)

@@ -17,5 +17,5 @@ def func_to_description(func):
 
 def bind(bind_type, pattern):
     def inner(func):
-        BINDS[bind_type].append((func_to_description(func), re.compile(pattern, re.I), func))
+        BINDS[bind_type].append((func_to_description(func), pattern, re.compile(pattern, re.I), func))
     return inner
