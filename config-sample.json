@@ -2,5 +2,6 @@
     "autojoin": [],
     "nick": INSERT_NICK,
     "realname": INSERT_REALNAME,
-    "server": ["irc", INSERT_PORT_NUMBER, INSERT_PASS_STR]
+    "server": ["irc", INSERT_PORT_NUMBER, INSERT_PASS_STR],
+    "ssl": true
 }

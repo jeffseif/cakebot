@@ -2,9 +2,18 @@ import json
 
 
 class Config:
+
+    __slots__ = [
+        'autojoin',
+        'nick',
+        'realname',
+        'server',
+        'ssl',
+    ]
     
     def __init__(self, **kwargs):
-        self.__dict__ = kwargs
+        for attr in self.__slots__:
+            setattr(self, attr, kwargs[attr])
 
     @classmethod
     def from_dict(cls, the_dict):

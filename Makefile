@@ -47,6 +47,7 @@ $(VIRTUALENV_LATEST).tar.gz:
 .PHONY: clean
 clean:
 	@rm -rf venv/
+	@find -name '__pycache__' -delete
 	@rm -rf $(VIRTUALENV_LATEST)/
 	@rm -f $(VIRTUALENV_LATEST).tar.gz
 	@rm -f $(HTML)

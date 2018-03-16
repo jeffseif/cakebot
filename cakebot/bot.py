@@ -10,12 +10,14 @@ class Bot(irc.bot.SingleServerIRCBot):
     @classmethod
     def from_config_path(cls, config_path):
         config = Config.from_json_path(config_path)
-        instance = cls(
-            server_list=[config.server],
-            nickname=config.nick,
-            realname=config.realname,
-            connect_factory=irc.connection.Factory(wrapper=ssl.wrap_socket),
-        )
+        kwargs = {
+            'server_list': [config.server],
+            'nickname': config.nick,
+            'realname': config.realname,
+        }
+        if config.ssl:
+            kwargs['connect_factory'] = irc.connection.Factory(wrapper=ssl.wrap_socket)
+        instance = cls(**kwargs)
         instance.config = config
         return instance
 
