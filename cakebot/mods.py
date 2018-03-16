@@ -19,7 +19,7 @@ def forward(self, conn, event, message, match):
             event.target,
             event.source.nick,
         ))
-        message = '{prefix}: {message}'.format(prefix=prefix, message=message)
+        message = '{prefix}: `{message}`'.format(prefix=prefix, message=message)
         for channel in self.FORWARDS:
             event.target = channel
             self.send(conn, event, message)

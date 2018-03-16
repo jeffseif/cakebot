@@ -1,6 +1,7 @@
 .DELETE_ON_ERROR:
 
 LOCKFILE = .already.running.lock
+LOG_FILE = log.txt
 PYTHON = python3.6
 VIRTUALENV_LATEST = virtualenv-15.1.0
 
@@ -14,7 +15,8 @@ $(LOCKFILE): config.json venv | already_running
 	@touch $@
 	@venv/bin/python \
 		-m cakebot.main \
-			--config=$< \
+			--verbose \
+			--config=$< >> $(LOG_FILE) 2>&1
 
 .PHONY: already_running
 already_running:
@@ -47,7 +49,8 @@ $(VIRTUALENV_LATEST).tar.gz:
 .PHONY: clean
 clean:
 	@rm -rf venv/
-	@find -name '__pycache__' -delete
 	@rm -rf $(VIRTUALENV_LATEST)/
 	@rm -f $(VIRTUALENV_LATEST).tar.gz
 	@rm -f $(HTML)
+	@find . -name '*.pyc' -delete
+	@find . -name '__pycache__' -type d -delete

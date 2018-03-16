@@ -1,5 +1,6 @@
 from cakebot import __version__
 from cakebot.bot import Bot
+from cakebot.logging import set_verbosity
 
 
 def main():
@@ -12,13 +13,22 @@ def main():
         version='%(prog)s {version}'.format(version=__version__),
     )
     parser.add_argument(
-        '--config_path',
         '-c',
+        '--config_path',
         default='config.py',
         type=str,
         help='Path to AIRC bot config json file',
     )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='Increase output verbosity',
+    )
     args = parser.parse_args()
+
+    set_verbosity(args.verbose)
 
     Bot.from_config_path(args.config_path).start()
 

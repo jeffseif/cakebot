@@ -6,6 +6,7 @@ import ssl
 
 import cakebot.bind
 import cakebot.config
+import cakebot.logging
 import cakebot.mods
 from cakebot import __version__
 
@@ -35,19 +36,19 @@ class Bot(irc.bot.SingleServerIRCBot):
     def on_nicknameinuse(self, conn, event):
         old = conn.get_nickname()
         new = old + '_'
-        print('Nick {old} already in use; trying {new}'.format(old=old,new=new))
+        cakebot.logging.warning('Nick {old} already in use; trying {new}'.format(old=old,new=new))
         conn.nick(new)
 
     def on_welcome(self, conn, event):
-        print('Successfully connected to AIRC!')
+        cakebot.logging.info('Successfully connected to AIRC!')
 
         for channel in self.config.forwards:
-            print('Forwarding to channel {channel}'.format(channel=channel))
+            cakebot.logging.info('Forwarding to channel {channel}'.format(channel=channel))
             conn.join(channel)
             self.FORWARDS.add(channel)
 
         for channel in self.config.listens:
-            print('Listening to channel {channel}'.format(channel=channel))
+            cakebot.logging.info('Listening to channel {channel}'.format(channel=channel))
             conn.join(channel)
             self.LISTENS.add(channel)
 
@@ -72,7 +73,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         if event.target.lower() == conn.get_nickname().lower():
             event.target = event.source.nick
         conn.privmsg(event.target, message)
-        print('> ({target}): {message}'.format(target=event.target, message=message))
+        cakebot.logging.info('> ({target}): {message}'.format(target=event.target, message=message))
 
     def on_privmsg(self, conn, event):
         self.respond(conn, event, is_private=True)
@@ -95,5 +96,5 @@ class Bot(irc.bot.SingleServerIRCBot):
         for name, pattern, match, func in cakebot.bind.BINDS[bind_type]:
             match = match.match(message)
             if match:
-                print('{bind_type}: {name} (`{pattern}`)'.format(bind_type=bind_type.upper(), name=name, pattern=pattern))
+                cakebot.logging.info('{bind_type}: {name} (`{pattern}`)'.format(bind_type=bind_type.upper(), name=name, pattern=pattern))
                 func(self, conn, event, message, match)
