@@ -40,7 +40,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         conn.nick(new)
 
     def on_welcome(self, conn, event):
-        cakebot.logging.info('Successfully connected to AIRC!')
+        cakebot.logging.info('Successfully connected to AIRC as {nickname}!'.format(nickname=conn.get_nickname()))
 
         for channel in self.config.forwards:
             cakebot.logging.info('Forwarding to channel {channel}'.format(channel=channel))
