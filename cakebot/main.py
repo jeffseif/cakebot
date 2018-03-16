@@ -1,6 +1,6 @@
 from cakebot import __version__
 from cakebot.bot import Bot
-from cakebot.logging import set_verbosity
+from cakebot.logging import setup
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
     )
     args = parser.parse_args()
 
-    set_verbosity(args.verbose)
+    setup(verbose=args.verbose)
 
     Bot.from_config_path(args.config_path).start()
 

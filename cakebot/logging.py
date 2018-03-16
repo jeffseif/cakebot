@@ -4,35 +4,23 @@ import logging
 from cakebot import __program__
 
 
-def set_verbosity(verbose):
+def setup(verbose):
+    FORMAT = '%(asctime)s:%(levelname)s:{program}	%(message)s'.format(program=__program__)
     if verbose == 0:
-        logging.basicConfig(level=logging.WARNING)
+        logging.basicConfig(format=FORMAT, level=logging.WARNING)
     elif verbose == 1:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(format=FORMAT, level=logging.INFO)
     elif verbose > 1:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 
-def prepend_timestamp(func):
-    def inner(message):
-        timestamp = str(datetime.datetime.now())
-        return func(' '.join((
-            timestamp,
-            message
-        )))
-    return inner
-
-
-@prepend_timestamp
 def warning(message):
     logging.getLogger(__name__).warning(message)
 
 
-@prepend_timestamp
 def info(message):
     logging.getLogger(__name__).info(message)
 
 
-@prepend_timestamp
 def debug(message):
     logging.getLogger(__name__).debug(message)
