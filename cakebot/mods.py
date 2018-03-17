@@ -1,16 +1,21 @@
+from cakebot import KILL_SWITCH
 from cakebot.bind import bind
+
+
+class DeathException(Exception):
+    pass
+
+
+@bind('hear', '^{kill}$'.format(kill=KILL_SWITCH))
+def die(self, conn, event, message, match):
+    reply = match.group(0)
+    raise DeathException('Aaaargh -- {reply} -- my only weakness!'.format(reply=reply))
 
 
 @bind('reply', '^echo (.*)')
 def echo(self, conn, event, message, match):
     reply = match.group(1)
     self.send(conn, event, reply)
-
-
-# @bind('hear', '(.*)')
-# def log(self, conn, event, message, match):
-#     reply = match.group(1)
-#     print('I heard this: ' + reply)
 
 
 def forward(self, conn, event, message, match):

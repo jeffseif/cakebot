@@ -9,12 +9,14 @@ import cakebot.config
 import cakebot.logging
 import cakebot.mods
 from cakebot import __version__
+from cakebot import KILL_SWITCH
 
 
 class Bot(irc.bot.SingleServerIRCBot):
 
     FORWARDS = set()
     LISTENS = set()
+    nick_to_kill = None
 
     @classmethod
     def from_config_path(cls, config_path):
@@ -34,12 +36,20 @@ class Bot(irc.bot.SingleServerIRCBot):
         return 'AIRC CakeBot Version {version}'.format(version=__version__)
 
     def on_nicknameinuse(self, conn, event):
-        old = conn.get_nickname()
-        new = old + '_'
-        cakebot.logging.warning('Nick {old} already in use; trying {new}'.format(old=old,new=new))
+        self.nick_to_kill = conn.get_nickname()
+        new = '_'.join((
+            self.nick_to_kill,
+            'killah',
+        ))
+        cakebot.logging.warning('Nick {old} already in use; logging into {new} and then trying to kill it with {kill} ...'.format(old=self.nick_to_kill,new=new,kill=KILL_SWITCH))
         conn.nick(new)
 
     def on_welcome(self, conn, event):
+        if self.nick_to_kill:
+            event.target = self.nick_to_kill
+            self.send(conn, event, KILL_SWITCH, override_target=True)
+            self.die()
+
         cakebot.logging.info('Successfully connected to AIRC as {nickname}!'.format(nickname=conn.get_nickname()))
 
         for channel in self.config.forwards:
@@ -69,8 +79,8 @@ class Bot(irc.bot.SingleServerIRCBot):
     def action(self, conn, event, message):
         self.send(conn, event, '\001ACTION {message}\001'.format(message=message))
 
-    def send(self, conn, event, message):
-        if event.target.lower() == conn.get_nickname().lower():
+    def send(self, conn, event, message, override_target=False):
+        if (not override_target) and (event.target.lower() == conn.get_nickname().lower()):
             event.target = event.source.nick
         conn.privmsg(event.target, message)
         cakebot.logging.info('> ({target}): {message}'.format(target=event.target, message=message))

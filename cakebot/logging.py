@@ -5,7 +5,7 @@ from cakebot import __program__
 
 
 def setup(verbose):
-    FORMAT = '%(asctime)s:%(levelname)s:{program}	%(message)s'.format(program=__program__)
+    FORMAT = '%(asctime)s:%(levelname)s:{program}:%(process)d	%(message)s'.format(program=__program__)
     if verbose == 0:
         logging.basicConfig(format=FORMAT, level=logging.WARNING)
     elif verbose == 1:
