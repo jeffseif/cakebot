@@ -9,7 +9,10 @@ class DeathException(Exception):
 
 @bind('hear', '^{kill}$'.format(kill=KILL_SWITCH))
 def die(self, conn, event, message, match):
-    warning = 'Aaaargh -- {reply} -- my only weakness!'.format(reply=match.group(0))
+    warning = '[{nickname}] Aaaargh -- {reply} -- my only weakness!'.format(
+        nickname=conn.get_nickname(),
+        reply=match.group(0),
+    )
     cakebot.logging.warning(warning)
     raise DeathException(warning)
 

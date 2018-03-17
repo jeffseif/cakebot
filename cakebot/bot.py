@@ -14,9 +14,12 @@ from cakebot import KILL_SWITCH
 
 class Bot(irc.bot.SingleServerIRCBot):
 
-    forwards = set()
-    listens = set()
     nick_to_kill = None
+
+    def reset_attrs(self):
+        self.forwards = set()
+        self.listens = set()
+        self.patterns = list()
 
     @classmethod
     def from_dict(cls, the_dict):
@@ -26,6 +29,7 @@ class Bot(irc.bot.SingleServerIRCBot):
         }
         instance = cls(**the_dict)
         instance.config = config
+        instance.reset_attrs()
         return instance
 
     def get_version(self):
@@ -37,7 +41,7 @@ class Bot(irc.bot.SingleServerIRCBot):
             self.nick_to_kill,
             'killah',
         ))
-        cakebot.logging.warning('Nick {old} already in use; logging into {new} and then trying to kill it with {kill} ...'.format(old=self.nick_to_kill,new=new,kill=KILL_SWITCH))
+        cakebot.logging.warning('[{new}] {old} already in use; trying to kill it with {kill} as {new} ...'.format(old=self.nick_to_kill,new=new,kill=KILL_SWITCH))
         conn.nick(new)
 
     def on_welcome(self, conn, event):
@@ -46,20 +50,22 @@ class Bot(irc.bot.SingleServerIRCBot):
             self.send(conn, event, KILL_SWITCH, override_target=True)
             self.die()
 
-        cakebot.logging.info('Successfully connected to AIRC as {nickname}!'.format(nickname=conn.get_nickname()))
+        nickname = conn.get_nickname()
+
+        cakebot.logging.info('[{nickname}] successfully connected to AIRC'.format(nickname=nickname))
 
         for channel in self.config['forwards']:
-            cakebot.logging.info('Forwarding to channel {channel}'.format(channel=channel))
+            cakebot.logging.info('[{nickname}] forwarding to channel {channel}'.format(nickname=nickname, channel=channel))
             conn.join(channel)
             self.forwards.add(channel)
 
         for channel in self.config['listens']:
-            cakebot.logging.info('Listening to channel {channel}'.format(channel=channel))
+            cakebot.logging.info('[{nickname}] listening to channel {channel}'.format(nickname=nickname, channel=channel))
             conn.join(channel)
             self.listens.add(channel)
 
         for pattern in self.config['patterns']:
-            cakebot.bind.bind('hear', pattern)(cakebot.mods.forward)
+            self.patterns.append(cakebot.bind.bind_inner('hear', pattern, cakebot.mods.forward))
 
     @staticmethod
     def get_is_to_me(nickname, message):
@@ -94,13 +100,19 @@ class Bot(irc.bot.SingleServerIRCBot):
         if is_private or self.get_is_to_me(nickname, message):
             if not is_private:
                 message = self.strip_nick_from_message(nickname, message)
-            self.try_reply_or_hear(conn, event, message, 'reply')
+            self.try_reply_or_hear(conn, event, message, cakebot.bind.BINDS['reply'])
 
-        self.try_reply_or_hear(conn, event, message, 'hear')
+        self.try_reply_or_hear(conn, event, message, cakebot.bind.BINDS['hear'])
+        self.try_reply_or_hear(conn, event, message, self.patterns)
 
-    def try_reply_or_hear(self, conn, event, message, bind_type):
-        for name, pattern, match, func in cakebot.bind.BINDS[bind_type]:
+    def try_reply_or_hear(self, conn, event, message, binds):
+        for bind_type, name, pattern, match, func in binds:
             match = match.match(message)
             if match:
-                cakebot.logging.info('{bind_type}: {name} (`{pattern}`)'.format(bind_type=bind_type.upper(), name=name, pattern=pattern))
+                cakebot.logging.info('[{nickname}] {bind_type}: {name} (`{pattern}`)'.format(
+                    nickname=conn.get_nickname(),
+                    bind_type=bind_type.upper(),
+                    name=name,
+                    pattern=pattern,
+                ))
                 func(self, conn, event, message, match)

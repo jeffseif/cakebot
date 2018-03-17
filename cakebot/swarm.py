@@ -1,3 +1,4 @@
+import concurrent.futures
 import irc.bot
 import irc.connection
 import ssl
@@ -23,9 +24,7 @@ class Swarm:
             kwargs = bot_config.to_dict()
             kwargs.update(server_kwargs)
             self.bots.append(cakebot.bot.Bot.from_dict(kwargs))
-        return
 
     def start(self):
-        for bot in self.bots:
-            print(bot)
-            bot.start()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(self.bots)) as executor:
+            executor.map(lambda bot: bot.start(), self.bots)
