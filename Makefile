@@ -51,6 +51,5 @@ clean:
 	@rm -rf venv/
 	@rm -rf $(VIRTUALENV_LATEST)/
 	@rm -f $(VIRTUALENV_LATEST).tar.gz
-	@rm -f $(HTML)
 	@find . -name '*.pyc' -delete
 	@find . -name '__pycache__' -type d -delete
