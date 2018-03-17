@@ -14,21 +14,17 @@ from cakebot import KILL_SWITCH
 
 class Bot(irc.bot.SingleServerIRCBot):
 
-    FORWARDS = set()
-    LISTENS = set()
+    forwards = set()
+    listens = set()
     nick_to_kill = None
 
     @classmethod
-    def from_config_path(cls, config_path):
-        config = cakebot.config.Config.from_json_path(config_path)
-        kwargs = {
-            'server_list': [config.server],
-            'nickname': config.nick,
-            'realname': config.realname,
+    def from_dict(cls, the_dict):
+        config = {
+            attr: the_dict.pop(attr)
+            for attr in ('forwards', 'listens', 'patterns')
         }
-        if config.ssl:
-            kwargs['connect_factory'] = irc.connection.Factory(wrapper=ssl.wrap_socket)
-        instance = cls(**kwargs)
+        instance = cls(**the_dict)
         instance.config = config
         return instance
 
@@ -52,17 +48,17 @@ class Bot(irc.bot.SingleServerIRCBot):
 
         cakebot.logging.info('Successfully connected to AIRC as {nickname}!'.format(nickname=conn.get_nickname()))
 
-        for channel in self.config.forwards:
+        for channel in self.config['forwards']:
             cakebot.logging.info('Forwarding to channel {channel}'.format(channel=channel))
             conn.join(channel)
-            self.FORWARDS.add(channel)
+            self.forwards.add(channel)
 
-        for channel in self.config.listens:
+        for channel in self.config['listens']:
             cakebot.logging.info('Listening to channel {channel}'.format(channel=channel))
             conn.join(channel)
-            self.LISTENS.add(channel)
+            self.listens.add(channel)
 
-        for pattern in self.config.patterns:
+        for pattern in self.config['patterns']:
             cakebot.bind.bind('hear', pattern)(cakebot.mods.forward)
 
     @staticmethod

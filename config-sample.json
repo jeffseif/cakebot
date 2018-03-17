@@ -1,9 +1,18 @@
 {
-    "forwards": [],
-    "listens": [],
-    "nick": INSERT_NICK,
-    "realname": INSERT_REALNAME,
-    "patterns": [],
+    "bots": {
+        INSERT_NICK: {
+            "forwards": [],
+            "listens": [],
+            "realname": INSERT_REALNAME,
+            "patterns": []
+        },
+        INSERT_NICK: {
+            "forwards": [],
+            "listens": [],
+            "realname": INSERT_REALNAME,
+            "patterns": []
+        }
+    },
     "server": ["irc", INSERT_PORT_NUMBER, INSERT_PASS_STR],
     "ssl": true
 }

@@ -1,6 +1,6 @@
 from cakebot import __version__
-from cakebot.bot import Bot
 from cakebot.logging import setup
+from cakebot.swarm import Swarm
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
 
     setup(verbose=args.verbose)
 
-    Bot.from_config_path(args.config_path).start()
+    Swarm(args.config_path).start()
 
 
 if __name__ == '__main__':
