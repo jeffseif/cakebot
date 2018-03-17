@@ -1,3 +1,4 @@
+import cakebot.logging
 from cakebot import KILL_SWITCH
 from cakebot.bind import bind
 
@@ -8,8 +9,9 @@ class DeathException(Exception):
 
 @bind('hear', '^{kill}$'.format(kill=KILL_SWITCH))
 def die(self, conn, event, message, match):
-    reply = match.group(0)
-    raise DeathException('Aaaargh -- {reply} -- my only weakness!'.format(reply=reply))
+    warning = 'Aaaargh -- {reply} -- my only weakness!'.format(reply=match.group(0))
+    cakebot.logging.warning(warning)
+    raise DeathException(warning)
 
 
 @bind('reply', '^echo (.*)')
