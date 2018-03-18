@@ -27,4 +27,8 @@ class Swarm:
 
     def start(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=len(self.bots)) as executor:
-            executor.map(lambda bot: bot.start(), self.bots)
+            futures = executor.map(lambda bot: bot.start(), self.bots)
+
+            for future in concurrent.futures.as_completed(futures):
+                if future.exception() is not None:
+                    exit(255)
