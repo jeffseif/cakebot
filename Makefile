@@ -17,6 +17,7 @@ $(LOCKFILE): config.json venv | already_running
 		-m cakebot.main \
 			--verbose \
 			--config=$< >> $(LOG_FILE) 2>&1
+	@rm -f $@
 
 .PHONY: already_running
 already_running:
@@ -48,8 +49,9 @@ $(VIRTUALENV_LATEST).tar.gz:
 
 .PHONY: clean
 clean:
-	@rm -rf venv/
-	@rm -rf $(VIRTUALENV_LATEST)/
+	@rm -f $(LOCKFILE)
 	@rm -f $(VIRTUALENV_LATEST).tar.gz
+	@rm -rf $(VIRTUALENV_LATEST)/
+	@rm -rf venv/
 	@find . -name '*.pyc' -delete
 	@find . -name '__pycache__' -type d -delete
