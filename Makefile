@@ -11,9 +11,9 @@ all: daemon
 .PHONY: daemon
 daemon: $(LOCKFILE)
 
-$(LOCKFILE): config.json venv | already_running
+$(LOCKFILE): config.json $(VENV) | already_running
 	@touch $@
-	@venv/bin/python \
+	@$(VENV)bin/python \
 		-m cakebot.main \
 			--verbose \
 			--config=$< >> $(LOG_FILE) 2>&1
@@ -23,7 +23,7 @@ $(LOCKFILE): config.json venv | already_running
 already_running:
 	@test ! -e $(LOCKFILE) || exit 0
 
-venv: requirements-minimal.txt $(VIRTUALENV_LATEST)/
+$(VENV): requirements-minimal.txt $(VIRTUALENV_LATEST)/
 	@$(PYTHON) ./$(VIRTUALENV_LATEST)/virtualenv.py \
 		--no-site-packages \
 		--python=$(PYTHON) \
@@ -52,6 +52,6 @@ clean:
 	@rm -f $(LOCKFILE)
 	@rm -f $(VIRTUALENV_LATEST).tar.gz
 	@rm -rf $(VIRTUALENV_LATEST)/
-	@rm -rf venv/
+	@rm -rf $(VENV)
 	@find . -name '*.pyc' -delete
 	@find . -name '__pycache__' -type d -delete
